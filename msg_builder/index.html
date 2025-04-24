@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>msg builder</title>
+</head>
+<body>
+    <div id="input_area">
+        <p>https://docs.google.com/document/d/e/2PACX-1vRMx5YQlZNa3ra8dYYxmv-QIQ3YJe8tbI3kqcuC7lQiZm-CSEznKfN_HYNSpoXcZIV3Y_O3YoUB1ecq/pub
+        </p>
+        <input type="text" id="input_url" >
+        <button id="target_btn">build msg</button>
+    </div>
+    <div id="target"></div>
+    <script>
+        window.addEventListener("load",()=>{
+            
+            let btn= document.getElementById("target_btn")
+            btn.addEventListener('click',()=>{
+                msg_builder()// entry point, gets the url from the html input
+            })
+            
+    async function msg_builder(){
+            throbber()
+            let doc = await get_doc()
+            let char_marix = await parse_doc(doc)
+            display_msg(char_marix)
+
+        }
+
+        let throbber=()=>{
+            let target = document.getElementById("target")
+            target.innerHTML="<h1>loading</h1>"
+        }
+         async function get_doc (){
+
+            let inp_str = document.getElementById("input_url").value
+            document.getElementById("input_url").value= ""
+            if(inp_str.length<=0){
+                alert("no input")
+                return
+            }else{
+                let res = await cors_corrector(inp_str)
+                return res
+            }
+        }
+
+       async function parse_doc (doc){
+           let res = []
+           if(typeof(doc)!= "string"){
+            console.log("something went wrong with the fetch")
+            return
+            }else{
+                let trimmed_str = doc.split("x-coordinateCharactery-coordinate")// sanitizing
+                trimmed_str= trimmed_str[1]
+
+                if(trimmed_str.length % 3!= 0 ){
+                    console.log("something went wrong with spliting the doc, check the format")
+                    return
+                }else{
+                    res = trimmed_str.split("")
+                    let char_marix= []
+                    // console.log(res)
+                    for (let index = 0; index < res.length; index+= 3) {// build the array
+                        let obj= {
+                                x:res[index],
+                                char:res[index+ 1],
+                                y:res[index+2]
+                        }
+                        char_marix.push(obj)
+                    }
+                    // console.table(char_marix)
+                    return char_marix
+                }
+                
+
+           }
+
+
+        }
+        
+        function display_msg(char_marix){
+            if(typeof(char_marix)!="object"){
+                console.log("something went wrong with parsing")
+                return
+            }
+            let depth_y_num=1
+            let width_x_num=1
+            let target = document.getElementById("target")
+            // get dimensions of msg
+            char_marix.forEach(char => {
+                char.x > width_x_num ?width_x_num=char.x : width_x_num
+                char.y > depth_y_num ?depth_y_num=char.y : depth_y_num
+            });
+
+            // build msg  with spacer
+            console.table(char_marix)
+            target.style.display= "grid"
+            target.style.gridTemplateColumns= `repeat(${ +width_x_num +1},0fr)`
+            target.style.gridTemplateRows= `repeat(${+depth_y_num +1}, 0fr)`
+
+            target.innerHTML=""
+            for (let y_index = 0; y_index <= depth_y_num; y_index++) {
+                for (let x_index = 0; x_index <= width_x_num; x_index++) {
+                    target.innerHTML+=`<div id="${"c_"+x_index+y_index }"> </div>`    
+                }
+            }          
+            // fill in the blanks
+            char_marix.forEach(char=>{
+                let el= document.getElementById(`c_${char.x}${char.y}`)
+                el.innerHTML= char.char
+            })
+
+
+        }
+
+        async function  cors_corrector(input_url){
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // if you fail to get the content, go to this url and click request access 
+            const targetUrl = input_url
+           return fetch(proxyUrl + targetUrl)
+            .then(res => res.text())
+            .then(html=>{
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const content = doc.querySelector('.doc-content')?.innerText || 'No content found';
+                return content
+            });
+         }       
+        
+        })
+    </script>
+</body>
+</html>
