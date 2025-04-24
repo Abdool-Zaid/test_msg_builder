@@ -12,6 +12,7 @@
         <button id="target_btn">build msg</button>
     </div>
     <div id="target"></div>
+    <div id="preview_input" style="display: none;"></div>
     <script>
         window.addEventListener("load",()=>{
             
@@ -24,6 +25,7 @@
             throbber()
             let doc = await get_doc()
             // let char_marix = await parse_doc(doc)
+            let char_marix= await html_to_array(doc)
             // display_msg(char_marix)
 
         }
@@ -44,6 +46,23 @@
                 return res
             }
         }
+        async function html_to_array(doc) {
+            let res = []
+            let preview_input= document.getElementById('preview_input')
+            preview_input.innerHTML= doc
+            let table = document.getElementsByTagName("table")
+            preview_input.innerHTML = table[0].innerHTML
+            preview_input.style.display="block"
+            //  the table data we want ,also should skip the first three to simplfy things
+            let class_name = preview_input.firstChild.className
+            let raw_data = document.querySelectorAll(`.${class_name}`)
+                for (let index = 3; index < raw_data.length; index++) {
+                    // console.log(raw_data[index].firstChild.innerHTML)
+                    res.push(raw_data[index].firstChild.innerHTML)
+                }              
+                return res
+            }
+
 
        async function parse_doc (doc){
            let res = []
@@ -152,11 +171,12 @@
             .then(res => res.text())
             .then(html=>{
                 const parser = new DOMParser();
-                console.log(html)
-                const doc = parser.parseFromString(html, 'text/html');
-                const content = doc.querySelector('.doc-content')?.innerText || 'No content found';
-                console.log(content)
-                return content
+                // console.log(html)
+                // const doc = parser.parseFromString(html, 'text/html');
+                // const content = doc.querySelector('.doc-content')?.innerText || 'No content found';
+                // console.log(content)
+                // return content
+                return html
             });
          }       
         
