@@ -101,7 +101,7 @@
             target.style.gridTemplateRows= `repeat(${+depth_y_num +1}, 0fr)`
 
             target.innerHTML=""
-            for (let y_index = 0; y_index <= depth_y_num; y_index++) {
+            for (let y_index = depth_y_num; y_index >=0; y_index--) {
                 for (let x_index = 0; x_index <= width_x_num; x_index++) {
                     target.innerHTML+=`<div id="${"c_"+x_index+y_index }"> </div>`    
                 }
