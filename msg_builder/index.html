@@ -54,7 +54,7 @@
             }else{
                 let trimmed_str = doc.split("x-coordinateCharactery-coordinate")// sanitizing
                 trimmed_str= trimmed_str[1]
-
+                // need to account for when num is larger than 1 digit
                 if(trimmed_str.length % 3!= 0 ){
                     console.log("something went wrong with spliting the doc, check the format")
                     return
@@ -70,7 +70,7 @@
                         }
                         char_marix.push(obj)
                     }
-                    // console.table(char_marix)
+                    console.table(char_marix)
                     return char_marix
                 }
                 
@@ -93,7 +93,7 @@
                 char.x > width_x_num ?width_x_num=char.x : width_x_num
                 char.y > depth_y_num ?depth_y_num=char.y : depth_y_num
             });
-
+            console.log(width_x_num,depth_y_num)
             // build msg  with spacer
             console.table(char_marix)
             target.style.display= "grid"
@@ -124,6 +124,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const content = doc.querySelector('.doc-content')?.innerText || 'No content found';
+                console.log(content)
                 return content
             });
          }       
