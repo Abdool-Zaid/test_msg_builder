@@ -7,8 +7,7 @@
 </head>
 <body>
     <div id="input_area">
-        <p>https://docs.google.com/document/d/e/2PACX-1vRMx5YQlZNa3ra8dYYxmv-QIQ3YJe8tbI3kqcuC7lQiZm-CSEznKfN_HYNSpoXcZIV3Y_O3YoUB1ecq/pub
-        </p>
+        <p>https://docs.google.com/document/d/e/2PACX-1vQGUck9HIFCyezsrBSnmENk5ieJuYwpt7YHYEzeNJkIb9OSDdx-ov2nRNReKQyey-cwJOoEKUhLmN9z/pub</p>
         <input type="text" id="input_url" >
         <button id="target_btn">build msg</button>
     </div>
@@ -24,8 +23,8 @@
     async function msg_builder(){
             throbber()
             let doc = await get_doc()
-            let char_marix = await parse_doc(doc)
-            display_msg(char_marix)
+            // let char_marix = await parse_doc(doc)
+            // display_msg(char_marix)
 
         }
 
@@ -54,14 +53,15 @@
             }else{
                 let trimmed_str = doc.split("x-coordinateCharactery-coordinate")// sanitizing
                 trimmed_str= trimmed_str[1]
-                // need to account for when num is larger than 1 digit
                 if(trimmed_str.length % 3!= 0 ){
                     console.log("something went wrong with spliting the doc, check the format")
                     return
                 }else{
-                    res = trimmed_str.split("")
+                    // need to account for when num is larger than 1 digit
+                    
+                    res = seperate_char(trimmed_str)
+
                     let char_marix= []
-                    // console.log(res)
                     for (let index = 0; index < res.length; index+= 3) {// build the array
                         let obj= {
                                 x:res[index],
@@ -78,6 +78,36 @@
            }
 
 
+        }
+
+        function seperate_char(data_str){
+            let data_list=[]
+            let pos_in_str=0
+            console.log(data_str)
+            for (let index = 0; index < data_str.length; index++) {
+                let inp = data_str[index]
+                if(inp% 1== 0){
+                    // console.log(inp,"is a number")
+                    
+                }else{
+                    // console.log(inp,"is not a number", index)
+                    if(data_str.slice(pos_in_str,index)!=undefined){
+
+                        data_list.push(data_str.slice(pos_in_str,index))
+                        pos_in_str= index+1
+                        data_list.push(data_str[index])
+                    }else{
+                        console.log("msg should show up once")
+                        data_list.push(data_str.slice(index, data_str.length))
+                    }
+
+                }
+                
+                
+            }
+            
+            console.log(data_list)
+            return data_list
         }
         
         function display_msg(char_marix){
@@ -122,6 +152,7 @@
             .then(res => res.text())
             .then(html=>{
                 const parser = new DOMParser();
+                console.log(html)
                 const doc = parser.parseFromString(html, 'text/html');
                 const content = doc.querySelector('.doc-content')?.innerText || 'No content found';
                 console.log(content)
