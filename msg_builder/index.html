@@ -24,9 +24,8 @@
     async function msg_builder(){
             throbber()
             let doc = await get_doc()
-            // let char_marix = await parse_doc(doc)
-            let char_marix= await html_to_array(doc)
-            // display_msg(char_marix)
+            let char_marix = await parse_doc(doc)
+            display_msg(char_marix)
 
         }
 
@@ -65,69 +64,21 @@
 
 
        async function parse_doc (doc){
+            let data =await html_to_array(doc)
            let res = []
-           if(typeof(doc)!= "string"){
-            console.log("something went wrong with the fetch")
-            return
-            }else{
-                let trimmed_str = doc.split("x-coordinateCharactery-coordinate")// sanitizing
-                trimmed_str= trimmed_str[1]
-                if(trimmed_str.length % 3!= 0 ){
-                    console.log("something went wrong with spliting the doc, check the format")
-                    return
-                }else{
-                    // need to account for when num is larger than 1 digit
-                    
-                    res = seperate_char(trimmed_str)
-
                     let char_marix= []
-                    for (let index = 0; index < res.length; index+= 3) {// build the array
+                    for (let index = 0; index < data.length; index+= 3) {// build the array
                         let obj= {
-                                x:res[index],
-                                char:res[index+ 1],
-                                y:res[index+2]
+                                x:data[index],
+                                char:data[index+ 1],
+                                y:data[index+2]
                         }
                         char_marix.push(obj)
                     }
-                    console.table(char_marix)
-                    return char_marix
-                }
-                
-
-           }
-
-
+                    // console.table(char_marix)
+            return char_marix
         }
 
-        function seperate_char(data_str){
-            let data_list=[]
-            let pos_in_str=0
-            console.log(data_str)
-            for (let index = 0; index < data_str.length; index++) {
-                let inp = data_str[index]
-                if(inp% 1== 0){
-                    // console.log(inp,"is a number")
-                    
-                }else{
-                    // console.log(inp,"is not a number", index)
-                    if(data_str.slice(pos_in_str,index)!=undefined){
-
-                        data_list.push(data_str.slice(pos_in_str,index))
-                        pos_in_str= index+1
-                        data_list.push(data_str[index])
-                    }else{
-                        console.log("msg should show up once")
-                        data_list.push(data_str.slice(index, data_str.length))
-                    }
-
-                }
-                
-                
-            }
-            
-            console.log(data_list)
-            return data_list
-        }
         
         function display_msg(char_marix){
             if(typeof(char_marix)!="object"){
